@@ -3,12 +3,11 @@
   "build": {
     "builder": "NIXPACKS",
     "nixpacksConfig": {
-      "aptPkgs": [
-        "unzip"
-      ]
+      "aptPkgs": ["unzip"]
     }
   },
   "deploy": {
-    "startCommand": "reflex run --env prod"
+    "startCommand": "reflex run --env prod",
+    "restartPolicyType": "ON_FAILURE"
   }
 }
