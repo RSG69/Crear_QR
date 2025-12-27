@@ -3,7 +3,7 @@ set -e
 
 # Instalar dependencias del sistema necesarias para Reflex
 apt-get update
-apt-get install -y unzip
+apt-get install -y unzip curl
 
 # Puerto Railway
 export PORT=${PORT:-3000}
@@ -17,4 +17,3 @@ reflex run \
   --backend-host 0.0.0.0 \
   --backend-port $PORT \
   --single-port
-
