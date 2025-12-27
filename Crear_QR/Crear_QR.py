@@ -1,42 +1,27 @@
 import reflex as rx
 import qrcode
-import os
-import time
+import io
+import base64
 
-QR_PATH = "assets/qr.png"
-
-# ------------------------
-# Funciones
-# ------------------------
-def generar_qr(texto: str):
-    qr = qrcode.make(texto)
-    qr.save(QR_PATH)
-
-def eliminar_qr():
-    if os.path.exists(QR_PATH):
-        os.remove(QR_PATH)
-
-# ------------------------
-# State
-# ------------------------
 class State(rx.State):
     texto: str = ""
-    qr_version: int = 0
+    qr_base64: str = ""
 
     def crear_qr(self):
-        # 1️⃣ borrar QR anterior
-        eliminar_qr()
+        if not self.texto:
+            return
 
-        # 2️⃣ generar nuevo QR
-        if self.texto:
-            generar_qr(self.texto)
+        # Crear QR en memoria
+        qr = qrcode.make(self.texto)
+        buffer = io.BytesIO()
+        qr.save(buffer, format="PNG")
 
-            # 3️⃣ forzar recarga de imagen
-            self.qr_version += 1
+        # Convertir a base64
+        img_base64 = base64.b64encode(buffer.getvalue()).decode()
 
-# ------------------------
-# UI
-# ------------------------
+        # Guardar en el estado
+        self.qr_base64 = f"data:image/png;base64,{img_base64}"
+
 def index():
     return rx.center(
         rx.vstack(
@@ -52,9 +37,9 @@ def index():
                 on_click=State.crear_qr,
             ),
             rx.cond(
-                os.path.exists(QR_PATH),
+                State.qr_base64 != "",
                 rx.image(
-                    src=f"/qr.png?v={State.qr_version}",
+                    src=State.qr_base64,
                     width="200px",
                 ),
             ),
@@ -62,8 +47,5 @@ def index():
         )
     )
 
-# ------------------------
-# App
-# ------------------------
 app = rx.App()
 app.add_page(index)
